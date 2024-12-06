@@ -10,7 +10,7 @@ export async function POST(request: Request) {
       data: { preferences }, // Assuming preferences is a field in the User model
     });
     return NextResponse.json(updatedUser);
-  } catch (error) {
+  } catch {
     return NextResponse.json({ message: "Error updating preferences" }, { status: 500 });
   }
 }

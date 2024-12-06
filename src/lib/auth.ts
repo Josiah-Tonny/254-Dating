@@ -1,8 +1,8 @@
-import { PrismaAdapter } from "@auth/prisma-adapter";
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { NextAuthOptions } from "next-auth";
 import { prisma } from "@/lib/prisma";
 import CredentialsProvider from "next-auth/providers/credentials";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import GoogleProvider from "next-auth/providers/google";
 import TwitterProvider from "next-auth/providers/twitter";
 import InstagramProvider from "next-auth/providers/instagram";
@@ -60,7 +60,6 @@ export const authOptions: NextAuthOptions = {
   debug: process.env.NODE_ENV === "development",
   pages: {
     signIn: "/login",
-    error: "/login",
   },
   callbacks: {
     async session({ token, session }) {
@@ -72,7 +71,7 @@ export const authOptions: NextAuthOptions = {
       }
       return session;
     },
-    async jwt({ token, user, account }) {
+    async jwt({ token, user }) {
       const dbUser = await prisma.user.findFirst({
         where: {
           email: token.email,

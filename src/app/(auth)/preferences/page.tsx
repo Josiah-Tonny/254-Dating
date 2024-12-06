@@ -1,26 +1,61 @@
-import { useState } from "react";
+"use client";
+
+import { useState, useEffect } from "react";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { Session } from 'next-auth';
 
-export default async function PreferencesPage() {
-  const session = await getServerSession(authOptions);
+export default function PreferencesPage() {
+  const [session, setSession] = useState<Session | null>(null);
 
-  const [preferences, setPreferences] = useState({
-    gender: "",
-    age: "",
-    distance: "",
+  useEffect(() => {
+    const fetchSession = async () => {
+      const sessionData = await getServerSession(authOptions);
+      setSession(sessionData);
+    };
+    fetchSession();
+  }, []);
+
+  const [preferences, setPreferences] = useState<{
+    gender: string;
+    age: string;
+    distance: string;
+    connections: string[];
+    bodyType: string;
+    height: string;
+    languages: string[];
+    orientation: string;
+    ethnicity: string;
+    religion: string;
+    politicalViews: string;
+    education: string[];
+    employment: string;
+    astrologySign: string;
+    lifestyle: {
+      alcohol: boolean;
+      smoking: boolean;
+      marijuana: boolean;
+    };
+    family: {
+      hasPets: boolean;
+      hasKids: boolean;
+      wantsKids: boolean;
+    };
+  }>({
+    gender: '',
+    age: '',
+    distance: '',
     connections: [],
-    bodyType: "",
-    height: "",
+    bodyType: '',
+    height: '',
     languages: [],
-    orientation: "",
-    ethnicity: "",
-    religion: "",
-    politicalViews: "",
+    orientation: '',
+    ethnicity: '',
+    religion: '',
+    politicalViews: '',
     education: [],
-    employment: "",
-    astrologySign: "",
+    employment: '',
+    astrologySign: '',
     lifestyle: {
       alcohol: false,
       smoking: false,
@@ -33,23 +68,28 @@ export default async function PreferencesPage() {
     },
   });
 
-  const handleCheckboxChange = (category, value) => {
-    setPreferences((prev) => ({
-      ...prev,
-      [category]: prev[category].includes(value)
-        ? prev[category].filter((v) => v !== value)
-        : [...prev[category], value],
-    }));
+  const handleCheckboxChange = (category: keyof typeof preferences, value: string) => {
+    setPreferences((prev) => {
+      if (Array.isArray(prev[category])) {
+        return {
+          ...prev,
+          [category]: prev[category].includes(value)
+            ? prev[category].filter((v) => v !== value)
+            : [...prev[category], value],
+        };
+      }
+      return prev;
+    });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     await fetch("/api/users/preferences", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ userId: session.user.id, preferences }),
+      body: JSON.stringify({ userId: session?.user?.email, preferences }),
     });
   };
 

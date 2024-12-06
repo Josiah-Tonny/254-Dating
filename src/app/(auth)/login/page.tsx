@@ -1,14 +1,21 @@
+"use client";
+
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { useEffect } from 'react';
 import LoginForm from "./login-form";
 
-export default async function LoginPage() {
-  const session = await getServerSession(authOptions);
-
-  if (session) {
-    redirect("/");
-  }
+export default function LoginPage() {
+  useEffect(() => {
+    const fetchSession = async () => {
+      const sessionData = await getServerSession(authOptions);
+      if (sessionData) {
+        redirect('/');
+      }
+    };
+    fetchSession();
+  }, []);
 
   return (
     <div className="container flex h-screen w-screen flex-col items-center justify-center">
